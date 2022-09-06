@@ -1,5 +1,5 @@
 # AWS Lambda Containerized Hello World
-Simple Hello World containerized Python 3.8 Lambda function.
+Simple Hello World containerized Python 3.9 Lambda function.
 
 A video walk through can also be found [here](https://youtu.be/Pweawno2uw4).
 ## Commands to build image and verifiy that it was built
@@ -7,6 +7,13 @@ A video walk through can also be found [here](https://youtu.be/Pweawno2uw4).
 docker build -t containerized-hello-world .
 docker images containerized-hello-world
 ```
+
+#### Note
+If trying to build mulitple times you may run out of disk space.   
+`docker system df` will show the reclaimable disck space.   
+`docker system prune -a` will delete all docker artifacts.   
+If you run out of memory, you may need to enlarge the Cloud9 instance.
+
 
 ## References
 https://youtu.be/Pweawno2uw4   
