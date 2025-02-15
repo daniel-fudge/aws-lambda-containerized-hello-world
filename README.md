@@ -1,7 +1,8 @@
 # AWS Lambda Containerized Hello World
-Simple Hello World containerized Python 3.9 Lambda function.
+Simple Hello World containerized Python 3.13 Lambda function.
 
-A video walk through can also be found [here](https://youtu.be/Pweawno2uw4).
+A video walk through can also be found [here](https://youtu.be/Pweawno2uw4) for the 
+original Pytohn 3.9 version.
 ## Commands to build image and verifiy that it was built
 ```shell
 docker build -t containerized-hello-world .
