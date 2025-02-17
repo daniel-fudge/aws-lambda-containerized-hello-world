@@ -6,16 +6,18 @@ original Pytohn 3.9 version.
 
 ## First set some environment variables
 ```shell
+export AWS_ACCOUNT_ID=[ENTER AWS ACCOUNT ID HERE]
 export AWS_PAGER=""
-export REGION=us-east-1
 export IMAGE_NAME=hello-world
 export IMAGE_TAG=v1
-export AWS_ACCOUNT_ID=[ENTER AWS ACCOUNT ID HERE]
+export LAMBDA_ROLE=lambda-execution-container
+export REGION=us-east-1
 ```
 
 ## Commands to build image and verifiy that it was built
 ```shell
-docker buildx build --platform linux/amd64 --provenance=false -t ${IMAGE_NAME}:$IMAGE_TAG .
+docker buildx build --platform linux/amd64 \
+--provenance=false -t ${IMAGE_NAME}:$IMAGE_TAG .
 docker images 
 ```
 
@@ -51,6 +53,34 @@ docker tag ${IMAGE_NAME}:${IMAGE_TAG} $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.
 ### Deploy Docker image to ECR
 ```shell 
 docker push $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/${IMAGE_NAME}:latest
+```
+
+## Create the Lambda function
+
+### Create a Lambda execution role
+You can create a role with the commandfs below or use an existing role.
+```shell
+aws iam create-role \
+--role-name $LAMBDA_ROLE \
+--assume-role-policy-document file://trust-policy.json
+```
+You need to attach the basic Lambda execution role.
+```shell
+aws iam attach-role-policy --role-name $LAMBDA_ROLE \
+--policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+```
+
+### Create the actual Lambda function
+```shell
+aws lambda create-function \
+--function-name $IMAGE_NAME --package-type Image \
+--code ImageUri=$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/${IMAGE_NAME}:latest \
+--role arn:aws:iam::${AWS_ACCOUNT_ID}:role/$LAMBDA_ROLE
+```
+
+### Chage the timeout
+```shell
+aws lambda update-function-configuration --function-name $IMAGE_NAME --timeout 120
 ```
 
 ## References
