@@ -1,16 +1,15 @@
 # AWS Lambda Containerized Hello World
 Simple Hello World containerized Python 3.13 Lambda function.
 
-A video walk through can also be found [here](https://youtu.be/Pweawno2uw4) for the 
-original Pytohn 3.9 version.
 
 ## First set some environment variables
 ```shell
 export AWS_ACCOUNT_ID=[ENTER AWS ACCOUNT ID HERE]
 export AWS_PAGER=""
+export BUCKET=[ENTER YOUR BUCKET NAME]
 export IMAGE_NAME=hello-world
-export IMAGE_TAG=v1
-export LAMBDA_ROLE=lambda-execution-container
+export IMAGE_TAG=v2
+export LAMBDA_ROLE=lambda-execution
 export REGION=us-east-1
 ```
 
@@ -68,6 +67,8 @@ You need to attach the basic Lambda execution role.
 ```shell
 aws iam attach-role-policy --role-name $LAMBDA_ROLE \
 --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+aws iam attach-role-policy --role-name $LAMBDA_ROLE \
+--policy-arn arn:aws:iam::aws:policy/service-role/AmazonS3FullAccess
 ```
 
 ### Create the actual Lambda function
@@ -78,13 +79,28 @@ aws lambda create-function \
 --role arn:aws:iam::${AWS_ACCOUNT_ID}:role/$LAMBDA_ROLE
 ```
 
-### Chage the timeout
+### Change the timeout
 ```shell
 aws lambda update-function-configuration --function-name $IMAGE_NAME --timeout 120
 ```
 
+### Test the function
+```shell
+aws lambda invoke --function-name $IMAGE_NAME \
+--payload '{"job_id": 1, "duration": 20}' --cli-binary-format raw-in-base64-out \
+response.json
+```
+
+### Update the function
+```shell
+aws lambda update-function-code \
+--function-name $IMAGE_NAME \
+--image-uri $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/${IMAGE_NAME}:latest \
+--publish
+```
+
+
 ## References
-https://youtu.be/Pweawno2uw4   
 https://docs.aws.amazon.com/lambda/latest/dg/images-create.html    
 https://docs.aws.amazon.com/lambda/latest/dg/python-image.html    
 https://aws.amazon.com/blogs/aws/new-for-aws-lambda-container-image-support/
